@@ -21,8 +21,6 @@ import Model.Message;
  * refer to prior mini-project labs and lecture materials for guidance on how a controller may be built.
  */
 public class SocialMediaController {
-    /*public AccountService account = new AccountService();
-    public MessageService message = new MessageService();*/
     AccountService account;
     MessageService message;
 
@@ -136,13 +134,12 @@ public class SocialMediaController {
     }
     // Get all messages
     public void getMessageHandler(Context ctx){
-        //MessageService message = new MessageService();
-        List<Message> allMessages = new ArrayList<>();
+        List<Message> m = message.getAllMessages();
 
-        if(allMessages.size() == 0){
-            ctx.json(new ArrayList<Message>());
+        if(m == null){
+            ctx.json(new ArrayList<>());
         } else{
-            ctx.json(allMessages);
+            ctx.json(m);
         }
         
         ctx.status(200);
@@ -150,28 +147,21 @@ public class SocialMediaController {
     //Get message by id
     private void getMessageByIdHandler(Context ctx) throws JsonProcessingException{
         int id = Integer.parseInt(ctx.pathParam("message_id"));
-        Message m = new Message();
-        if(m.message_id == id){
-            ctx.json(message.GetMessageById(id));
+        Message m = message.getMessageId(id);
+
+        if(m != null){
+            ctx.json(m);
         }
         ctx.status(200);
-       
     }
     // Delete a message
     private void deleteMessageHandler(Context ctx) throws JsonProcessingException{
         int id = Integer.parseInt(ctx.pathParam("message_id"));
-        List<Message> allMessages = message.getAllMessages();
-        ObjectMapper om = new ObjectMapper();
-        Message ms = om.readValue(ctx.body(), Message.class);
+        Message m = message.getMessageId(id);
 
-        for(Message m: allMessages){
-            if(m.getMessage_id() == id){
-                ms = m;
-                message.deleteMessage(id);
-            }
+        if(m!= null){
+            ctx.json(m);
         }
-
-        ctx.json(om.writeValueAsString(ms));
         ctx.status(200);
     }
     // Update a message
@@ -180,26 +170,20 @@ public class SocialMediaController {
         Message m = om.readValue(ctx.body(), Message.class);
         int id = Integer.parseInt(ctx.pathParam("message_id"));
         Message update = message.updateMessageById(id, m);
-        boolean messageExists = false;
-        boolean messageGoodLength = false;
-        String text = m.getMessage_text();
-
-        if(text != "" && text != null){
-                messageExists = true;
-        }
-        if(text.length() < 255){
-            messageGoodLength = true;
-        }
-        if(messageExists && messageGoodLength){
+        
+        if(update == null){
+            ctx.status(400);
+        } else{
             ctx.json(om.writeValueAsString(update));
             ctx.status(200);
-        } else{
-            ctx.status(400);
         }
+
+
+
     }
     //Get all messages from a user
     private void getAllMessageByIdHandler(Context ctx) throws JsonProcessingException{
-        ObjectMapper om = new ObjectMapper();
+        /*ObjectMapper om = new ObjectMapper();
         int id = Integer.parseInt(ctx.pathParam("posted_by"));
         List<Message> allMessages = message.getAllMessages();
         List<Message> certain = new ArrayList<>();
@@ -209,9 +193,17 @@ public class SocialMediaController {
                 m = om.readValue(ctx.body(), Message.class);
                 certain.add(m);
             }
-        }
+        }*/
         
-        ctx.json(certain);
+        
+        int id = Integer.parseInt(ctx.pathParam("account_id"));
+        List<Message> m = message.getAllMessagesId(id);
+
+        if(m == null){
+            ctx.json(new ArrayList<>());
+        } else{
+            ctx.json(m);
+        }
         ctx.status(200);
     }
 }

@@ -6,6 +6,7 @@ import Model.Message;
 
 public class MessageService {
     MessageDAO messageDAO;
+    Message message;
 
     public MessageService(){
         messageDAO = new MessageDAO();
@@ -20,12 +21,15 @@ public class MessageService {
     }
 
     public Message updateMessageById(int id, Message message){
-        if(messageDAO.getMessageById(id) == null){
+        Message update = messageDAO.getMessageById(id);
+        if(message.getMessage_text().isBlank() || message.getMessage_text().length()>=255 || messageDAO.getMessageById(id) == null){
             return null;
-        } else{
-            messageDAO.updateMessage(id, message);
-            return messageDAO.getMessageById(id);
         }
+
+        messageDAO.updateMessage(id, message);
+        String text = message.getMessage_text();
+        update.setMessage_text(text);
+        return update;
     }
 
     public Message newMessage(Message message){
@@ -36,11 +40,11 @@ public class MessageService {
         return messageDAO.getAllMessages();
     }
 
-    public Message GetMessageById(int id){
-        return messageDAO.getMessageById(id);
-    }
-
     public List<Message> getAllMessagesId(int posted){
         return messageDAO.getAllMessagesById(posted);
+    }
+
+    public Message getMessageId(int id){
+        return messageDAO.getMessageById(id);
     }
 }
